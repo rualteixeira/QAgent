@@ -326,7 +326,7 @@ async def _connect_with_retries(ex: Execution, settings: Settings, caps: dict, u
 
 RETRY_DELAY_S = 3.0  # pausa base entre tentativas de preparação (G3)
 
-_REAL_ACTIONS = ("tap", "long_press", "type_text", "swipe", "scroll", "open_app", "close_apps", "human_input",
+_REAL_ACTIONS = ("tap", "long_press", "type_text", "swipe", "scroll", "open_app", "close_apps", "drag", "human_input",
                  "already_done", "key_")
 
 

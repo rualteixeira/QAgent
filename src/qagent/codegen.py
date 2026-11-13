@@ -126,6 +126,20 @@ def _ai_action_lines(a: dict, fragile: set[tuple[str, str]]) -> list[str]:
         kind, direction = tool.split("_", 1)
         target = _loc_call("find", strat, sel) if strat and strat != "coordinates" else "None"
         call = f"{kind}({_q(direction)}, {target})"
+    elif tool == "drag":
+        spec = json.loads(val or "{}")
+        to, hold = spec.get("to") or {}, bool(spec.get("hold", True))
+        if strat == "coordinates" and sel:
+            sx, sy = sel.split(",", 1)
+            src = f"({int(sx)}, {int(sy)})"
+        else:
+            src = _loc_call("find", strat, sel)
+        dst = (f"({int(to['x'])}, {int(to['y'])})" if "x" in to
+               else _loc_call("find", to.get("strategy"), to.get("selector")))
+        if not src or not dst:
+            return []
+        expect = _expect_literal(a.get("target")) if strat == "coordinates" else None
+        call = f"drag({src}, {dst}, hold={hold}" + (f", expect={expect})" if expect else ")")
     elif tool == "close_apps":
         pkgs = [p for p in (sel or "").split(",") if p]
         return warn + [f"close_app({_q(p)})" for p in pkgs] + [
@@ -334,6 +348,9 @@ def generate_python_script(result: ExecutionResult, request: dict) -> str:
         "from selenium.common.exceptions import TimeoutException",
         "from selenium.webdriver.support import expected_conditions as EC",
         "from selenium.webdriver.support.ui import WebDriverWait",
+        "from selenium.webdriver.common.actions import interaction",
+        "from selenium.webdriver.common.actions.action_builder import ActionBuilder",
+        "from selenium.webdriver.common.actions.pointer_input import PointerInput",
         "",
         "APPIUM_SERVER = os.environ.get('APPIUM_SERVER', 'http://127.0.0.1:4723')",
         "BOUNDS_TOLERANCE = 12  # px: toques por coordenadas só se o elemento gravado estiver no mesmo sítio",
@@ -647,6 +664,32 @@ def generate_python_script(result: ExecutionResult, request: dict) -> str:
         "        driver.terminate_app(package)",
         "    except Exception:",
         "        pass  # já não estava a correr",
+        "",
+        "",
+        "def _center(target):",
+        "    if isinstance(target, tuple):",
+        "        return target",
+        "    r = target.rect",
+        "    return r['x'] + r['width'] // 2, r['y'] + r['height'] // 2",
+        "",
+        "",
+        "def drag(source, target, hold=True, expect=None):",
+        "    \"\"\"Arrastar (elemento ou ponto → elemento ou ponto) com ações W3C de toque. hold=True: manter premido",
+        "    antes de mover (mover/reordenar itens); hold=False: mover diretamente (sliders, desenhar).\"\"\"",
+        "    ensure_app()",
+        "    (sx, sy), (tx, ty) = _center(source), _center(target)",
+        "    if expect:",
+        "        check_target(sx, sy, expect)",
+        "    actions = ActionBuilder(driver, mouse=PointerInput(interaction.POINTER_TOUCH, 'finger'), duration=800)",
+        "    finger = actions.pointer_action",
+        "    finger.move_to_location(sx, sy)",
+        "    finger.pointer_down()",
+        "    if hold:",
+        "        finger.pause(0.8)",
+        "    finger.move_to_location(tx, ty)",
+        "    finger.release()",
+        "    actions.perform()",
+        "    wait_stable()",
         "",
         "",
         "def hide_keyboard():",

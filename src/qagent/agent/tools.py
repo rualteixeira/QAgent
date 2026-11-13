@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import json
 import time
 from pathlib import Path
 
@@ -28,7 +29,7 @@ _LAUNCHER_HINTS = ("launcher", ".home")
 # Ferramentas que não contam para o orçamento de ações do passo.
 FREE_TOOLS = frozenset({"get_screen", "read_text", "look_at_screen", "list_apps", "request_human"})
 # Ferramentas que podem repetir-se com os mesmos argumentos sem serem recusadas.
-REPEATABLE_TOOLS = frozenset({"wait", "scroll", "swipe"})
+REPEATABLE_TOOLS = frozenset({"wait", "scroll", "swipe", "drag"})
 
 
 def foreground_package(pkgs_now: set[str], pkgs_before: set[str], opened: str | None = None) -> str:
@@ -245,23 +246,62 @@ class StepTools:
         """Interfaces desenhadas sem acessibilidade (o modelo vê-as na captura mas não estão na descrição): agir
         num ponto. A posição vem em pixels da captura, que pode estar reduzida → converte-se para o ecrã real."""
         async def do():
-            if not self.st.shot_size:
-                raise ToolMisuse("call look_at_screen first: point actions are only for content you can see in "
-                                 "the screenshot but that is not listed in the screen description")
-            sw, sh = self.st.shot_size
-            if not (0 <= x < sw and 0 <= y < sh):
-                raise ToolMisuse(f"point ({x},{y}) is outside the screenshot ({sw}x{sh} px)")
-            scr = self.d.screen
-            w, h = (scr.width, scr.height) if scr and scr.width and scr.height else (sw, sh)
-            px, py = round(x * w / sw), round(y * h / sh)
-            el = self.d.element_at(px, py)
-            if el and (el.clickable or el.long_clickable or el.checkable or el.editable) and \
-                    (el.bounds[2] - el.bounds[0]) * (el.bounds[3] - el.bounds[1]) < 0.25 * w * h:
-                raise ToolMisuse(f"that point is inside listed element {el.ref} "
-                                 f"({el.label or el.cls.rsplit('.', 1)[-1]}): use the ref-based tool with ref={el.ref}")
+            px, py = self._to_screen(x, y, prefer_ref=True)
             await self.d.gesture({"action": gesture, "x": px, "y": py})
             record_point(self.result, gesture, px, py, node_at(self.d.xml, px, py))
             return f"{'Tapped' if gesture == 'tap' else 'Long-pressed'} at ({px},{py}) on the screen."
+        return await self._act(do)
+
+    def _to_screen(self, x: int, y: int, *, prefer_ref: bool) -> tuple[int, int]:
+        """Posição da captura → ecrã real (a captura pode estar reduzida). Com prefer_ref, um ponto dentro de um
+        controlo LISTADO e pequeno é recusado: deve usar-se a ref (localizador estável)."""
+        if not self.st.shot_size:
+            raise ToolMisuse("call look_at_screen first: positions are only for content you can see in the "
+                             "screenshot but that is not listed in the screen description")
+        sw, sh = self.st.shot_size
+        if not (0 <= x < sw and 0 <= y < sh):
+            raise ToolMisuse(f"point ({x},{y}) is outside the screenshot ({sw}x{sh} px)")
+        scr = self.d.screen
+        w, h = (scr.width, scr.height) if scr and scr.width and scr.height else (sw, sh)
+        px, py = round(x * w / sw), round(y * h / sh)
+        el = self.d.element_at(px, py)
+        if prefer_ref and el and (el.clickable or el.long_clickable or el.checkable or el.editable) and \
+                (el.bounds[2] - el.bounds[0]) * (el.bounds[3] - el.bounds[1]) < 0.25 * w * h:
+            raise ToolMisuse(f"that point is inside listed element {el.ref} "
+                             f"({el.label or el.cls.rsplit('.', 1)[-1]}): use ref={el.ref} instead")
+        return px, py
+
+    async def drag(self, from_ref: str | None = None, from_x: int | None = None, from_y: int | None = None,
+                   to_ref: str | None = None, to_x: int | None = None, to_y: int | None = None,
+                   hold: bool = True) -> str:
+        """Arrastar de um elemento/ponto para outro. hold=True: premir, manter e mover (mover/reordenar itens,
+        appium_drag_and_drop); hold=False: mover diretamente (sliders, desenhar; gesto com início e fim)."""
+        async def do():
+            if bool(from_ref) == (from_x is not None and from_y is not None):
+                raise ToolMisuse("give the start as from_ref OR from_x+from_y")
+            if bool(to_ref) == (to_x is not None and to_y is not None):
+                raise ToolMisuse("give the end as to_ref OR to_x+to_y")
+            src_el = self.d.element(from_ref) if from_ref else None
+            dst_el = self.d.element(to_ref) if to_ref else None
+            src = src_el.center if src_el else self._to_screen(from_x, from_y, prefer_ref=True)
+            dst = dst_el.center if dst_el else self._to_screen(to_x, to_y, prefer_ref=False)
+            if hold:
+                args = {"sourceX": src[0], "sourceY": src[1], "targetX": dst[0], "targetY": dst[1]}
+                if src_el and (sid := await self.d.find(src_el)):
+                    args = {"sourceElementUUID": sid, **{k: v for k, v in args.items() if k.startswith("target")}}
+                if dst_el and (tid := await self.d.find(dst_el)):
+                    args = {**{k: v for k, v in args.items() if k.startswith("source")}, "targetElementUUID": tid}
+                await self.d.conn.call("appium_drag_and_drop", {**args, "sessionId": self.d.sid})
+            else:
+                await self.d.gesture({"action": "swipe", "x": src[0], "y": src[1], "endX": dst[0], "endY": dst[1]})
+            to = ({"strategy": dst_el.locator.strategy, "selector": dst_el.locator.value}
+                  if dst_el and dst_el.locator else {"x": dst[0], "y": dst[1]})
+            value = json.dumps({"to": to, "hold": hold}, ensure_ascii=False)
+            if src_el:
+                record(self.result, "drag", src_el, value=value)
+            else:
+                record_point(self.result, "drag", src[0], src[1], node_at(self.d.xml, *src), value=value)
+            return f"Dragged from {src} to {dst} ({'press-and-hold' if hold else 'direct move'})."
         return await self._act(do)
 
     async def tap_point(self, x: int, y: int) -> str:
@@ -350,6 +390,9 @@ class StepTools:
                           "that is not listed in the screen description (drawn or not exposed UI)."),
             T(coroutine=self.long_press_point, name="long_press_point", args_schema=S.PointArgs,
               description="Long-press a position of the latest screenshot (same rule as tap_point)."),
+            T(coroutine=self.drag, name="drag", args_schema=S.DragArgs,
+              description="Drag from an element or screenshot position to another (move or reorder items, "
+                          "sliders, drawing). Positions follow the tap_point rule."),
             T(coroutine=self.list_apps, name="list_apps", args_schema=S.ListAppsArgs,
               description="List installed apps (package names) to find an app mentioned by name."),
             T(coroutine=self.open_app, name="open_app", args_schema=S.OpenAppArgs,

@@ -188,3 +188,65 @@ def test_dialog_button_is_tapped_by_ref_with_its_stable_locator():
                 "[WHEN] confirma o diálogo")
     tap = [a for a in sr.actions if a.tool == "tap"][0]
     assert (tap.strategy, tap.selector) == ("id", "android:id/button1")
+
+
+# ---------- arrastar ----------
+
+def _script_for(sr: StepResult) -> str:
+    result = ExecutionResult(execution_id="x", record_id="x", created_at="2026-11-13T00:00:00Z", status="passed",
+                             steps=[StepResult(id=1, name="When arrasta", status="passed", actions=sr.actions,
+                                               locators=sr.locators)])
+    code = generate_python_script(result, {"testExecution": "t", "platform": "android"})
+    compile(code, "t.py", "exec")
+    return code.split("def run_test")[1]
+
+
+def test_drag_element_onto_element_holds_first_and_is_reproduced_in_the_script():
+    s = parse_screen(xml("list"))
+    rows = [e for e in s.elements if e.rid == P + "item"]
+    conn = FakeConn(xml("list"))
+    sr, _ = run(conn, [call("drag", 1, from_ref=rows[0].ref, to_ref=rows[2].ref),
+                       call("finish_step", 2, status="passed", reason="reordenado")], "[WHEN] move a 1.ª linha")
+    dnd = [a for n, a in conn.calls if n == "appium_drag_and_drop"]
+    assert dnd and dnd[0]["sourceElementUUID"] == "el-1" and dnd[0]["targetElementUUID"] == "el-1"
+    rec = [a for a in sr.actions if a.tool == "drag"][0]
+    assert '"hold": true' in rec.value
+    body = _script_for(sr)
+    assert "drag(find(" in body and "hold=True" in body
+
+
+def test_drag_between_screenshot_positions_moves_directly_and_converts_pixels(tmp_path):
+    shot = tmp_path / "s.png"
+    shot.write_bytes(png_header(400, 889))
+    conn = FakeConn(xml("canvas"), shot)
+    sr, _ = run(conn, [call("look_at_screen", 1),
+                       call("drag", 2, from_x=100, from_y=444, to_x=300, to_y=444, hold=False),
+                       call("finish_step", 3, status="passed", reason="arrastado")], "[WHEN] desliza o controlo")
+    swipes = [a for n, a in conn.calls if n == "appium_gesture" and a.get("action") == "swipe"]
+    assert swipes == [{"action": "swipe", "x": 270, "y": 1199, "endX": 810, "endY": 1199, "sessionId": "sid-1"}]
+    body = _script_for(sr)
+    assert "drag((270, 1199), (810, 1199), hold=False, expect={'cls': 'android.view.View'" in body
+
+
+def test_drag_needs_one_start_and_one_end():
+    conn = FakeConn(xml("list"))
+    _, seen = run(conn, [call("drag", 1, to_x=5, to_y=5),
+                         call("finish_step", 2, status="failed", reason="x")], "[WHEN] arrasta")
+    assert any("give the start as from_ref OR from_x+from_y" in m for m in seen)
+    assert not any(n in ("appium_drag_and_drop", "appium_gesture") for n, _ in conn.calls)
+
+
+# ---------- relação nome da app ↔ package, em qualquer língua ----------
+
+@pytest.mark.parametrize("step, package, expected", [
+    ("Open the Notes app and create a note", "com.vendor.notes", True),
+    ("Abre a aplicação Notas e cria uma nota", "com.vendor.notas", True),
+    ("Ouvre l'application Horloge", "org.example.horloge", True),
+    ("Öffne die Wetter-App", "de.anbieter.wetter", True),
+    ("打开 calculator", "com.vendor.calculator", True),
+    ("Abre a app de notas", "com.vendor.calculator", False),
+    ("Open the app", "com.example.app", False),           # partes genéricas de packages não contam
+])
+def test_package_matches_step_without_language_word_lists(step, package, expected):
+    from qagent.agent.navigation import package_matches_step
+    assert package_matches_step(package, step) is expected

@@ -32,7 +32,8 @@ def signature(el: UiElement) -> ElementSignature:
                             desc=_stable(el.desc, False))
 
 
-def record_point(result: StepResult, tool: str, x: int, y: int, node: dict | None) -> None:
+def record_point(result: StepResult, tool: str, x: int, y: int, node: dict | None,
+                 value: str | None = None) -> None:
     """Ação num ponto do ecrã (sem elemento listado): coordenadas (frágeis) + o nó que lá estava, para o script
     gerado confirmar o ecrã antes de repetir o toque."""
     target = None
@@ -40,7 +41,8 @@ def record_point(result: StepResult, tool: str, x: int, y: int, node: dict | Non
         target = ElementSignature(cls=node["cls"], bounds=node["bounds"], text=_stable(node["text"], node["editable"]),
                                   desc=_stable(node["desc"], False))
     sel = f"{x},{y}"
-    result.actions.append(ActionRecord(tool=tool, strategy="coordinates", selector=sel, result="ok", target=target))
+    result.actions.append(ActionRecord(tool=tool, strategy="coordinates", selector=sel, result="ok", target=target,
+                                       value=value))
     if not any(l.strategy == "coordinates" and l.value == sel for l in result.locators):
         result.locators.append(LocatorRecord(strategy="coordinates", value=sel, fragile=True,
                                              element=node["cls"].rsplit(".", 1)[-1] if node else None))

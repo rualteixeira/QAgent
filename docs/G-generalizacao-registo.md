@@ -341,3 +341,21 @@ Requisito do projeto: o agente tem de funcionar com qualquer app nativa desconhe
   - superfície desenhada + um botão.
   - `tests/test_generic_screens.py` (9 testes) cobre a leitura, contagens, elementos tapados, a conversão captura → ecrã (200,444 numa captura 400x889 → 540,1199 num ecrã 1080x2400), a recusa sem captura, fora da captura ou sobre um controlo listado, e o script gerado.
 - **Testes:** 85 automáticos. Não validado no emulador (sem novas execuções de teste); o comportamento antigo não muda (as ferramentas novas só atuam quando o modelo as chama).
+
+## 20. Arrastar e heurística independente da língua (2026-11-13)
+
+- **`drag`** (agente): de um elemento (ref) ou posição da captura até outro elemento ou posição.
+  - `hold=true` → premir, manter e mover (`appium_drag_and_drop`), para mover ou reordenar itens.
+  - `hold=false` → mover diretamente (`appium_gesture` com início e fim), para sliders e desenho.
+  - As posições seguem as regras do `tap_point`: exigem captura, são convertidas da captura para o ecrã, e um ponto de partida sobre um controlo listado é encaminhado para a ref.
+  - Fica registado com o localizador da origem, o destino (localizador ou posição) e o modo.
+  - O script gerado usa `drag(origem, destino, hold, expect)` com ações W3C de toque (premir, manter, mover, largar) e confirma o ecrã antes de arrastar a partir de uma posição.
+  - `appium_drag_and_drop` passou a ser verificado no `/health`.
+- **`package_matches_step`** (aviso de "package sem relação com a app pedida") deixou de usar palavras em português e inglês.
+  - Compara palavras do passo (≥4 caracteres, qualquer alfabeto) com as partes do package.
+  - Ignora apenas partes técnicas de packages (`com`, `org`, `android`, `app`…).
+  - É só um aviso: um falso positivo apenas o suprime.
+- **Testes:** 95 automáticos (10 novos).
+  - Arrastar elemento → elemento (lista genérica), posição → posição numa superfície desenhada (100,444 → 300,444 numa captura 400x889 = 270,1199 → 810,1199 no ecrã), e recusa sem origem.
+  - Heurística com passos em inglês, português, francês, alemão e chinês + inglês.
+  - Não validado no emulador (sem novas execuções de teste).

@@ -9,15 +9,16 @@ from qagent.agent.errors import ToolMisuse
 from qagent.apps import home_package, installed_apps
 from qagent.mcp_client import McpConnection, ToolError
 
-_STOPWORDS = {"app", "the", "and", "abre", "abrir", "vai", "para", "com", "uma", "que", "depois", "open",
-              "launch", "go", "to", "back", "volta", "aplicação", "aplicacao", "application", "faz", "valida"}
+# Partes técnicas comuns em nomes de packages (não identificam a app). Nenhuma palavra de língua natural.
+_GENERIC_SEGMENTS = {"com", "org", "net", "io", "co", "android", "google", "apps", "app", "mobile", "client"}
 
 
 def package_matches_step(package: str, instruction: str) -> bool:
-    """True se algum segmento do package (≥3 letras) partilha uma palavra (≥3 letras) do passo."""
-    words = {w for w in re.findall(r"[a-zà-ú0-9]{3,}", (instruction or "").lower()) if w not in _STOPWORDS}
-    parts = {p for p in re.split(r"[._]", package.lower()) if len(p) >= 3 and p not in {"com", "android", "google", "apps"}}
-    return any(w in p or p in w for w in words for p in parts)
+    """True se uma palavra do passo (≥4 caracteres, qualquer língua) e uma parte do package se contêm uma à
+    outra. Só serve para um AVISO ao modelo (nunca recusa): falsos positivos apenas suprimem o aviso."""
+    words = {w for w in re.findall(r"\w{4,}", (instruction or "").lower()) if not w.isdigit()}
+    parts = {p for p in re.split(r"[._]", package.lower()) if len(p) >= 3 and p not in _GENERIC_SEGMENTS}
+    return any(w in p or (len(p) >= 4 and p in w) for w in words for p in parts)
 
 
 class AppNavigator:

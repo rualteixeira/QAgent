@@ -51,6 +51,17 @@ class PointArgs(BaseModel):
     y: int = Field(ge=0, description="Vertical position in pixels of the latest screenshot (look_at_screen)")
 
 
+class DragArgs(BaseModel):
+    from_ref: str | None = Field(None, description="Element to drag (ref from the latest screen description)")
+    from_x: int | None = Field(None, ge=0, description="Start position (latest screenshot pixels) when not listed")
+    from_y: int | None = Field(None, ge=0, description="Start position (latest screenshot pixels) when not listed")
+    to_ref: str | None = Field(None, description="Element to drag onto (ref)")
+    to_x: int | None = Field(None, ge=0, description="End position (latest screenshot pixels)")
+    to_y: int | None = Field(None, ge=0, description="End position (latest screenshot pixels)")
+    hold: bool = Field(True, description="true: press and hold first, then move (move or reorder items); "
+                                         "false: move directly (sliders, drawing)")
+
+
 class CloseAppsArgs(BaseModel):
     packages: list[str] | None = Field(
         None, description="Packages to close (from list_apps). Omit to close every app used in this test")
@@ -102,5 +113,5 @@ class FinishArgs(BaseModel):
         None, description="With how=already_done_by_step: number of that earlier step")
 
 
-ALL_SCHEMAS = (RefArgs, TypeArgs, SwipeArgs, ScrollArgs, ScrollToArgs, KeyArgs, ListAppsArgs, OpenAppArgs, PointArgs, CloseAppsArgs, WaitArgs,
+ALL_SCHEMAS = (RefArgs, TypeArgs, SwipeArgs, ScrollArgs, ScrollToArgs, KeyArgs, ListAppsArgs, OpenAppArgs, PointArgs, DragArgs, CloseAppsArgs, WaitArgs,
                WaitTextArgs, ScreenArgs, HumanArgs, Assertion, FinishArgs)

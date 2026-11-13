@@ -31,6 +31,7 @@ LLM_TOOL_ALLOWLIST: frozenset[str] = frozenset(
         "appium_find_elements",
         "appium_get_active_element",
         "appium_gesture",
+        "appium_drag_and_drop",
         "appium_set_value",
         "appium_get_text",
         "appium_mobile_keyboard",
