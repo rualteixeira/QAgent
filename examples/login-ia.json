@@ -1,0 +1,33 @@
+{
+  "steps": [
+    {
+      "action": "ai",
+      "text": "Abre o menu e entra no ecrã de Log In"
+    },
+    {
+      "action": "ai",
+      "text": "Faz login com o utilizador {{testData.username}} e a password {{testData.password}}"
+    },
+    {
+      "action": "ai",
+      "text": "Valida que o catálogo de produtos é apresentado"
+    }
+  ],
+  "platform": "android",
+  "testData": {
+    "username": "bod@example.com",
+    "password": "{{secret:demo_pass}}"
+  },
+  "options": {
+    "stopOnFailure": true,
+    "screenshots": "every_step",
+    "resetApps": [
+      "com.saucelabs.mydemoapp.android"
+    ]
+  },
+  "app": {
+    "android": {
+      "appPackage": "com.saucelabs.mydemoapp.android"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "testExecution": "Cria um temporizador de 5 segundos e inicia-o. Valida que, quando o tempo acaba, a app indica que o temporizador terminou.",
+  "app": {
+    "android": {
+      "appPackage": "com.google.android.deskclock"
+    }
+  },
+  "platform": "android",
+  "options": {
+    "stopOnFailure": true,
+    "screenshots": "every_step",
+    "resetApps": [
+      "com.google.android.deskclock"
+    ]
+  }
+}

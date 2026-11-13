@@ -1,0 +1,29 @@
+{
+  "scenario": {
+    "name": "Ativar tema escuro",
+    "scenario": [
+      {
+        "type": "GIVEN",
+        "description": "estou nas definições de ecrã (display) do dispositivo"
+      },
+      {
+        "type": "WHEN",
+        "description": "ativo o tema escuro"
+      },
+      {
+        "type": "THEN",
+        "description": "o tema escuro fica ativo"
+      }
+    ]
+  },
+  "app": {
+    "android": {
+      "appPackage": "com.android.settings"
+    }
+  },
+  "platform": "android",
+  "options": {
+    "stopOnFailure": true,
+    "screenshots": "every_step"
+  }
+}

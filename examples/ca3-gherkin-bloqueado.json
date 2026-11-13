@@ -1,0 +1,40 @@
+{
+  "scenario": {
+    "name": "Login com utilizador bloqueado",
+    "scenario": [
+      {
+        "type": "GIVEN",
+        "description": "estou no ecrã de Log In (menu > Log In)"
+      },
+      {
+        "type": "WHEN",
+        "description": "faço login com o utilizador {{testData.username}} e a password {{testData.password}}"
+      },
+      {
+        "type": "THEN",
+        "description": "é apresentado o catálogo de produtos"
+      },
+      {
+        "type": "AND",
+        "description": "o menu mostra a opção Log Out"
+      }
+    ]
+  },
+  "platform": "android",
+  "testData": {
+    "username": "alice@example.com",
+    "password": "{{secret:demo_pass}}"
+  },
+  "options": {
+    "stopOnFailure": true,
+    "screenshots": "every_step",
+    "resetApps": [
+      "com.saucelabs.mydemoapp.android"
+    ]
+  },
+  "app": {
+    "android": {
+      "appPackage": "com.saucelabs.mydemoapp.android"
+    }
+  }
+}

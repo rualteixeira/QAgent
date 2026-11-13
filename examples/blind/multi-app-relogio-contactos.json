@@ -1,0 +1,16 @@
+{
+  "testExecution": "Vai à app do relógio, cria um temporizador de 10 segundos e inicia-o. Depois vai à app de contactos e cria um contacto com o nome {{testData.name}}; valida que o contacto foi guardado. A seguir volta à app do relógio e valida que o temporizador já terminou.",
+  "platform": "android",
+  "testData": {
+    "name": "Multi App"
+  },
+  "options": {
+    "stopOnFailure": true,
+    "screenshots": "every_step",
+    "resetApps": [
+      "com.google.android.deskclock",
+      "com.google.android.contacts",
+      "com.android.providers.contacts"
+    ]
+  }
+}

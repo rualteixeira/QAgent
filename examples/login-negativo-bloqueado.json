@@ -1,0 +1,97 @@
+{
+  "steps": [
+    {
+      "name": "Abrir o menu",
+      "action": "tap",
+      "locator": {
+        "strategy": "accessibility id",
+        "value": "View menu"
+      }
+    },
+    {
+      "name": "Mostrar 'Log In' no menu",
+      "action": "scroll_to",
+      "locator": {
+        "strategy": "-android uiautomator",
+        "value": "new UiSelector().text(\"Log In\")"
+      }
+    },
+    {
+      "name": "Escolher 'Log In'",
+      "action": "tap",
+      "locator": {
+        "strategy": "-android uiautomator",
+        "value": "new UiSelector().text(\"Log In\")"
+      }
+    },
+    {
+      "name": "Introduzir o utilizador",
+      "action": "type",
+      "locator": {
+        "strategy": "id",
+        "value": "com.saucelabs.mydemoapp.android:id/nameET"
+      },
+      "text": "{{testData.username}}"
+    },
+    {
+      "name": "Introduzir a password",
+      "action": "type",
+      "locator": {
+        "strategy": "id",
+        "value": "com.saucelabs.mydemoapp.android:id/passwordET"
+      },
+      "text": "{{testData.password}}"
+    },
+    {
+      "name": "Tocar em Login",
+      "action": "tap",
+      "locator": {
+        "strategy": "accessibility id",
+        "value": "Tap to login with given credentials"
+      }
+    },
+    {
+      "name": "Validar catálogo 'Products'",
+      "action": "assert_text",
+      "locator": {
+        "strategy": "id",
+        "value": "com.saucelabs.mydemoapp.android:id/productTV"
+      },
+      "text": "Products",
+      "timeoutSec": 10
+    },
+    {
+      "name": "Abrir o menu",
+      "action": "tap",
+      "locator": {
+        "strategy": "accessibility id",
+        "value": "View menu"
+      }
+    },
+    {
+      "name": "Validar sessão iniciada ('Log Out' no menu)",
+      "action": "scroll_to",
+      "locator": {
+        "strategy": "-android uiautomator",
+        "value": "new UiSelector().text(\"Log Out\")"
+      }
+    }
+  ],
+  "platform": "android",
+  "testData": {
+    "username": "alice@example.com",
+    "password": "{{secret:demo_pass}}"
+  },
+  "options": {
+    "stopOnFailure": true,
+    "screenshots": "every_step",
+    "resetApps": [
+      "com.saucelabs.mydemoapp.android"
+    ]
+  },
+  "app": {
+    "android": {
+      "appPackage": "com.saucelabs.mydemoapp.android"
+    }
+  }
+}

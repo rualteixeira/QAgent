@@ -1,0 +1,18 @@
+{
+  "testExecution": "Abre app eShop depois valida quantos produtos tem no carrinho. Verifica no carrinho quais sao os produtos\n",
+  "platform": "android",
+  "device": {
+    "udid": "emulator-5554",
+    "type": "EMULATOR"
+  },
+  "testData": {},
+  "options": {
+    "stopOnFailure": true,
+    "screenshots": "every_step",
+    "maxActionsPerStep": 8,
+    "timeoutPerStepSec": 90,
+    "recordVideo": false,
+    "resetApps": [],
+    "humanTimeoutSec": 600
+  }
+}

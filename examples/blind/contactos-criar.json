@@ -1,0 +1,22 @@
+{
+  "testExecution": "Cria um novo contacto com o nome {{testData.firstName}} {{testData.lastName}} e o número de telefone {{testData.phone}} e guarda-o. Valida que o contacto foi criado com esse nome e esse número.",
+  "app": {
+    "android": {
+      "appPackage": "com.google.android.contacts"
+    }
+  },
+  "testData": {
+    "firstName": "Teste",
+    "lastName": "QAgent",
+    "phone": "912345678"
+  },
+  "platform": "android",
+  "options": {
+    "stopOnFailure": true,
+    "screenshots": "every_step",
+    "resetApps": [
+      "com.google.android.contacts",
+      "com.android.providers.contacts"
+    ]
+  }
+}
