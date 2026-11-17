@@ -7,8 +7,7 @@ O QAgent não conhece a app de antemão: recebe só o package/APK (ou nenhum, se
 Cada execução produz:
 - um relatório por passo: estado, motivo, força da evidência, localizadores e evidência (screenshot/XML);
 - um script **Python + Appium**, gerado sem LLM, que repete o caminho fora do QAgent (QA/CI).
-## Arquitetura
-[arquitetura](https://github.com/rualteixeira/QAgent/blob/main/docs/ARQUITETURA.md)
+
 ## Componentes e portas
 
 | Componente | Porta | Arranque |
@@ -114,7 +113,7 @@ Sem `app`, o teste começa no ecrã inicial e o próprio texto diz que apps abri
 | `humanTimeoutSec` | 600 | Espera máxima por uma ação do QA |
 | `infraRetries` | 1 | Novas tentativas de ligação/criação da sessão. **Nunca** repete passos |
 | `reportLanguage` | pt-PT | Idioma dos motivos escritos pelo LLM |
-| `promptVersion` | `e2` | Versão da prompt do executor (`e1` para reproduzir execuções antigas) |
+| `promptVersion` | `e3` | Versão da prompt do executor (`e1` ou `e2` para reproduzir execuções antigas) |
 
 ### Leitura do resultado
 
@@ -149,7 +148,7 @@ O cabeçalho do script indica:
 
 - `tests/test_prompts_app_agnostic.py` falha se uma prompt mencionar termos das apps de teste. As prompts têm de servir qualquer app.
 - `examples/` tem casos da My Demo App (regressão); `examples/blind/` tem casos para apps de sistema nunca usadas na afinação.
-- Os registos de cada fase estão em `docs/` (F0–F5, G).
+- A arquitetura está descrita em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
 
 ## Limitações conhecidas
 
