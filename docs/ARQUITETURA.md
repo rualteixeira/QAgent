@@ -422,7 +422,7 @@ sequenceDiagram
             E->>J: validate
             J->>M: page source (asserção relida)
             alt contestado
-                J-->>E: mensagem; o ciclo continua
+                J-->>E: mensagem, o ciclo continua
             else aceite
                 E-->>E: passed / StepFailed / PreexistingState
             end
