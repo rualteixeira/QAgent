@@ -1,23 +1,5 @@
 # QAgent — Arquitetura reconstruída a partir do código
 
-> Engenharia reversa da arquitetura do repositório `QAgent` (ramo `main`, commit `676078b`, 2026-11-13), feita a 2026-11-16.
-> Descreve o sistema tal como existe. Não é uma auditoria e não propõe correções.
-> As linhas citadas referem-se a esse commit.
-
-**Etiquetas de evidência**
-
-| Etiqueta | Significado |
-|---|---|
-| **CONFIRMADO** | Evidência direta (ficheiro e função/linha indicados) |
-| **⚠ INFERIDO** | Dedução a partir de evidência indireta (a origem é indicada) |
-| **DESCONHECIDO** | O artefacto existe, mas não há evidência do seu papel |
-| **HIPÓTESE** | Direção futura ou intenção dos autores |
-
-**Nomes canónicos** (usados em todas as vistas):
-- Elementos internos: **Interface web**, **API QAgent**, **Registo**, **Orquestrador**, **Normalizador**, **Executor estruturado**, **Executor LLM**, **Ferramentas do agente**, **Juiz do veredicto**, **Modelo do ecrã**, **Cliente MCP**, **Sessão Appium**, **Verificação de saúde**, **Fábrica de LLM**, **Gerador de script**, **RunLog**, **Disco `runs/`**.
-- Elementos externos: **appium-mcp**, **Dispositivo Android**, **adb**, **Provider LLM**, **Servidor Appium 4723**.
-
----
 
 ## 1. Resumo executivo
 
