@@ -7,7 +7,8 @@ O QAgent não conhece a app de antemão: recebe só o package/APK (ou nenhum, se
 Cada execução produz:
 - um relatório por passo: estado, motivo, força da evidência, localizadores e evidência (screenshot/XML);
 - um script **Python + Appium**, gerado sem LLM, que repete o caminho fora do QAgent (QA/CI).
-
+## Arquitetura
+[arquitetura](https://github.com/rualteixeira/QAgent/blob/main/docs/ARQUITETURA.md)
 ## Componentes e portas
 
 | Componente | Porta | Arranque |
