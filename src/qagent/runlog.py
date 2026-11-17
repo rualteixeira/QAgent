@@ -1,4 +1,4 @@
-"""qagent.log por execução (JSON lines). Segredos mascarados antes de escrever (CPS 7.5, CA9)."""
+"""qagent.log por execução (JSON lines). Segredos mascarados antes de escrever."""
 
 from __future__ import annotations
 

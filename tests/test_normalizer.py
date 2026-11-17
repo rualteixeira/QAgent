@@ -1,4 +1,4 @@
-"""Normalizador (F3): Gherkin determinístico e texto livre com LLM simulado."""
+"""Normalizador: Gherkin determinístico e texto livre com LLM simulado."""
 
 import asyncio
 

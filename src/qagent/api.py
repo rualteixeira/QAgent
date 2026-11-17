@@ -1,4 +1,4 @@
-"""API FastAPI do QAgent (CPS 7.9). Arranque: uv run uvicorn qagent.api:app --port 8100"""
+"""API FastAPI do QAgent. Arranque: uv run uvicorn qagent.api:app --port 8100"""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from qagent.orchestrator import SecretError
 from qagent.registry import Registry, artifact_path
 
 # O endpoint /sse do appium-mcp envia um evento legado "endpoint" que o cliente mcp regista
-# como aviso a cada ligação (F1-registo 5.4). É ruído.
+# como aviso em cada ligação. É só ruído.
 logging.getLogger("mcp.client.streamable_http").setLevel(logging.ERROR)
 log = logging.getLogger("qagent")
 
@@ -54,7 +54,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, exc: RequestValidationError):
-        # Convenção do genai_fastapi: validação → 400 {"detail": ...}
+        # Erros de validação respondem 400 (em vez do 422 do FastAPI) com {"detail": ...}
         errors = [{"loc": e["loc"], "msg": e["msg"]} for e in exc.errors()]
         return JSONResponse(status_code=400, content={"detail": errors})
 
@@ -91,7 +91,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/mobile/testExecution", dependencies=auth, status_code=202,
               response_model=ExecutionCreated | ExecutionResult, response_model_by_alias=True)
     async def post_execution(body: TestExecutionInput, response: Response,
-                             wait: bool = Query(False, description="Modo síncrono (compatível com o genai_fastapi)"),
+                             wait: bool = Query(False, description="Modo síncrono: espera pelo fim da execução"),
                              wait_timeout_sec: float = Query(600, alias="waitTimeoutSec", gt=0, le=3600),
                              x_provider: str | None = Header(None),
                              x_llm_model: str | None = Header(None, alias="X-LLM-Model"),
@@ -108,7 +108,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(400, "texto livre, Gherkin e passos 'ai' exigem um LLM: "
                                      "cabeçalhos X-Provider e X-LLM-*")
         if body.platform != "android" or body.device.remote_server_url:
-            raise HTTPException(501, "Só Android local nesta fase (iOS remoto = F6).")
+            raise HTTPException(501, "Por agora só é suportado Android local.")
         try:
             ex = registry.create(body, llm_params)
         except SecretError as e:
@@ -154,7 +154,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/mobile/testExecution/{eid}/script", dependencies=auth)
     async def get_script(eid: str):
-        """Script Python + Appium gerado das ações executadas (sem LLM). docs/CPS-geracao-codigo-testes.md."""
+        """Script Python + Appium gerado das ações executadas (sem LLM)."""
         ex = get_ex(eid)
         if ex.result.status not in TERMINAL:
             raise HTTPException(409, f"a execução ainda não terminou (estado '{ex.result.status}')")
@@ -166,7 +166,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(404, "request.json da execução não encontrado") from e
         if any(s and len(s) >= 3 and s in code for s in ex.secrets):
             raise HTTPException(500, "o script gerado conteria um segredo; geração recusada")
-        try:  # validar a sintaxe ANTES de gravar/entregar (auditoria, fase 9)
+        try:  # validar a sintaxe antes de gravar/entregar
             compile(code, f"test_{eid}.py", "exec")
         except SyntaxError as e:
             raise HTTPException(500, f"o script gerado tem um erro de sintaxe (linha {e.lineno}); não foi gravado") from e

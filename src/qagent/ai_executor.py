@@ -1,15 +1,14 @@
-"""Executor de UM passo em linguagem natural com LLM (CPS 7.1 "Executor de passo", 7.6). Agnóstico à app.
+"""Executor de um passo em linguagem natural com LLM. Agnóstico à app.
 
 Desenho:
-- ReAct limitado ao passo: o LLM recebe o passo, os placeholders de testData e o MODELO DO ECRÃ
+- ReAct limitado ao passo: o LLM recebe o passo, os placeholders de testData e o modelo do ecrã
   (qagent.screen: todos os elementos interativos, incluindo só-ícone, com estado e posição).
 - O LLM refere elementos por `ref` (e1, e2…) do último ecrã; o QAgent converte-a no locator mais estável
   e regista-o (frágil se for resourceId+instance ou coordenadas). O LLM não escreve locators.
 - Segredos: o LLM só vê `{{testData.<chave>}}`; o valor é substituído na execução.
 - O veredicto (finish_step) é validado no código (qagent.agent.verdict).
 
-G4 (2026-11-13): este módulo ficou só com o ciclo ReAct; as partes estão em qagent.agent (ver o __init__).
-Os nomes públicos mantêm-se: AiStepExecutor, HumanInputRequired, PreexistingState.
+Aqui fica só o ciclo ReAct; as restantes partes estão em qagent.agent.
 """
 
 from __future__ import annotations
@@ -47,7 +46,7 @@ class AiStepExecutor:
         self._llm = llm
         self._max_actions = max_actions
         self._secrets = Secrets(test_data, secret_keys)
-        # Estado por EXECUÇÃO (atravessa os passos): último ecrã, apps instaladas e apps já abertas.
+        # Estado por execução (partilhado entre passos): último ecrã, apps instaladas e apps já abertas.
         self._device = Device(conn, session_id, session or SessionView(conn, session_id))
         self._nav = AppNavigator(conn, session_id, udid)
         self.prompt_version, self._system_prompt = executor_prompt(prompt_version, report_language)
@@ -132,7 +131,7 @@ class AiStepExecutor:
                                 out = await by_name[name].ainvoke(args)
                     out = str(out)[:MAX_TOOL_OUTPUT]
                     if has_screen(out):
-                        compact_old_screens(messages)  # F5: só o ecrã mais recente fica completo
+                        compact_old_screens(messages)  # só o ecrã mais recente fica completo
                     messages.append(ToolMessage(out, tool_call_id=tc["id"]))
                 if st.pending_image:
                     messages.append(image_message(st.pending_image))

@@ -1,4 +1,4 @@
-"""Orquestrador de uma execução (CPS 7.1/7.2). Determinístico; o LLM só entra no executor de passo."""
+"""Orquestrador de uma execução. Determinístico; o LLM só entra no executor de passo."""
 
 from __future__ import annotations
 
@@ -57,7 +57,7 @@ _ENV_HINTS = ("adb", "timed out", "device", "emulator", "instrumentation", "uiau
 
 
 def classify_exception(e: BaseException) -> str:
-    """Categoria (CA5) de uma exceção fora de um veredicto funcional."""
+    """Categoria de falha de uma exceção fora de um veredicto funcional."""
     if isinstance(e, (EnvironmentProblem, HumanTimeout, asyncio.TimeoutError)):
         return "environment"
     if isinstance(e, NormalizerError):
@@ -103,7 +103,7 @@ def build_android_caps(settings: Settings, req: TestExecutionInput) -> dict:
             caps["appium:appActivity"] = a.app_activity
         if a.app is not None:
             caps["appium:app"] = a.app
-        # Outra app que não a por omissão. NÃO basta omitir as chaves: o appium-mcp junta o seu
+        # Outra app que não a por omissão. Não basta omitir as chaves: o appium-mcp junta o seu
         # CAPABILITIES_CONFIG às capabilities do pedido ({...config, ...pedido}) e só depois remove as
         # que valem "" (filterEmptyCapabilities, create-session.js). Enviar "" anula o valor por omissão.
         if a.app_package and not a.app:
@@ -179,7 +179,7 @@ async def run_execution(ex: Execution, settings: Settings, lock_for: Callable[[s
     try:
         res.progress.message = "À espera do dispositivo"
         ex.save()
-        # G3: bloqueio POR DISPOSITIVO (CPS 7.3 regra 5). Sem udid no pedido usa-se o 1.º dispositivo pronto, para
+        # Bloqueio por dispositivo. Sem udid no pedido usa-se o 1.º dispositivo pronto, para
         # que um pedido sem udid e outro com o mesmo udid não corram em paralelo no mesmo aparelho.
         udid = req.device.udid or await first_ready_device()
         async with lock_for(udid or ""):
@@ -190,7 +190,7 @@ async def run_execution(ex: Execution, settings: Settings, lock_for: Callable[[s
             log.write("execution_started", executionId=ex.id, input=ex.input_kind, steps=len(ex.steps), udid=udid)
             problem = await device_precheck(udid)
             if problem:
-                raise EnvironmentProblem(problem)  # falha rápida, sem novas tentativas (G1)
+                raise EnvironmentProblem(problem)  # falha rápida, sem novas tentativas
             if udid:
                 props = await device_props(udid)
                 res.device.platform_version, res.device.model = props.get("platformVersion"), props.get("model")
@@ -210,8 +210,7 @@ async def run_execution(ex: Execution, settings: Settings, lock_for: Callable[[s
                             log.write("app_reset_failed", package=pkg, error=str(e)[:200])
                     main_pkg = req.app.android.app_package if req.app and req.app.android else None
                     if main_pkg and main_pkg in req.options.reset_apps:
-                        # G6: limpar os dados fecha a app; a app em teste tem de voltar a abrir (antes era o
-                        # noReset=false das capabilities que o fazia).
+                        # Limpar os dados fecha a app; a app em teste tem de voltar a abrir.
                         await conn.call("appium_app_lifecycle",
                                         {"action": "activate", "id": main_pkg, "sessionId": sess.session_id})
                         log.write("app_relaunched", package=main_pkg)
@@ -290,7 +289,7 @@ async def run_execution(ex: Execution, settings: Settings, lock_for: Callable[[s
 
 async def _connect_with_retries(ex: Execution, settings: Settings, caps: dict, udid: str | None
                                 ) -> tuple[AsyncExitStack, McpConnection, AppiumSession]:
-    """G3: liga ao appium-mcp e cria a sessão Appium; repete só esta preparação (infraestrutura, antes de
+    """Liga ao appium-mcp e cria a sessão Appium; repete só esta preparação (infraestrutura, antes de
     qualquer passo) até options.infraRetries vezes. Devolve a pilha que fecha a ligação."""
     res, log, retries = ex.result, ex.log, ex.request.options.infra_retries
     for attempt in range(retries + 1):
@@ -324,14 +323,14 @@ async def _connect_with_retries(ex: Execution, settings: Settings, caps: dict, u
     raise AssertionError("unreachable")
 
 
-RETRY_DELAY_S = 3.0  # pausa base entre tentativas de preparação (G3)
+RETRY_DELAY_S = 3.0  # pausa base entre tentativas de preparação
 
 _REAL_ACTIONS = ("tap", "long_press", "type_text", "swipe", "scroll", "open_app", "close_apps", "drag", "human_input",
                  "already_done", "key_")
 
 
 def step_outcome(step: StructuredStep, sr: StepResult) -> str | None:
-    """G3: força da evidência do veredicto (models.StepOutcome). Regra genérica, só sobre o que foi registado."""
+    """Força da evidência do veredicto (models.StepOutcome). Regra genérica, só sobre o que foi registado."""
     if sr.status == "skipped":
         return None
     if sr.status == "error":
@@ -358,7 +357,7 @@ _PKG_RE = re.compile(r"[A-Za-z][\w]*(\.[A-Za-z_][\w]*)+")
 
 
 async def _record_app_versions(ex: Execution, udid: str | None) -> None:
-    """G3: versionName das apps do teste (pedido, resetApps e apps abertas/alcançadas durante a execução)."""
+    """Lê o versionName das apps do teste (pedido, resetApps e apps abertas/alcançadas durante a execução)."""
     if not udid:
         return
     req, res = ex.request, ex.result
@@ -384,8 +383,8 @@ class RunState(TypedDict):
 
 
 def build_graph(ex: Execution, sess: AppiumSession, executor: StructuredExecutor):
-    """Grafo LangGraph (CPS 6.2/7.1): normalize → execute_step (ciclo) → fim.
-    O ReAct do LLM fica DENTRO de execute_step (AiStepExecutor); a sessão Appium fica fora do grafo."""
+    """Grafo LangGraph: normalize → execute_step (ciclo) → fim.
+    O ReAct do LLM fica dentro de execute_step (AiStepExecutor); a sessão Appium fica fora do grafo."""
     res, req, log = ex.result, ex.request, ex.log
 
     async def normalize(state: RunState) -> dict:
@@ -514,19 +513,18 @@ async def _evidence(ex: Execution, sess: AppiumSession, i: int, sr: StepResult) 
         xml = await sess.page_source()
         if has_error_dialog(xml):
             # Só os diálogos de erro do Android (aerr_*). Notificações/dicas/permissões não são erro
-            # (F-multi-app, 2026-11-12: o alarme de outra app em ecrã inteiro era tomado por ANR).
+            # (ex.: o alarme de outra app em ecrã inteiro não é um ANR).
             sr.status, sr.failure_category = "error", "app"  # a app não responde / parou
             sr.reason = (f"{sr.reason + ' ' if sr.reason else ''}Diálogo de erro do Android em primeiro plano "
                          f"(app não responde ou parou).")
         if sr.status == "failed":
             texts = AppiumSession.visible_texts(xml)
             if texts:
-                # Mascarar: um segredo escrito num campo não-password apareceria aqui (CA9).
+                # Mascarar: um segredo escrito num campo não-password apareceria aqui.
                 sr.reason = ex.log.mask(f"{sr.reason} Textos no ecrã: {texts}")
         if sr.status != "passed":
             name = f"step-{i:02d}.xml"
-            # Mascarar: um segredo escrito num campo não-password fica em claro no XML (falha anterior
-            # a 2026-11-13; o XML só era gravado em passos não passados, mas sem máscara).
+            # Mascarar: um segredo escrito num campo não-password ficaria em claro no XML.
             (ex.run_dir / name).write_text(ex.log.mask(xml), encoding="utf-8")
             sr.evidence.page_source = name
             ex.add_artifact(name)
@@ -536,7 +534,7 @@ async def _evidence(ex: Execution, sess: AppiumSession, i: int, sr: StepResult) 
         try:
             src = await sess.screenshot()
             name = f"step-{i:02d}.png"
-            shutil.copy2(src, ex.run_dir / name)  # SCREENSHOTS_DIR é global no servidor HTTP (F1 5.5)
+            shutil.copy2(src, ex.run_dir / name)  # SCREENSHOTS_DIR é global no servidor HTTP: copiar para a pasta da execução
             sr.evidence.screenshot = name
             ex.add_artifact(name)
         except Exception as e:  # noqa: BLE001
@@ -545,7 +543,7 @@ async def _evidence(ex: Execution, sess: AppiumSession, i: int, sr: StepResult) 
 
 async def _cleanup(ex: Execution, sess: AppiumSession) -> None:
     """Apaga a sessão Appium (também em stop/erro). Se falhar, o fecho da ligação MCP
-    dispara APPIUM_MCP_ON_CLIENT_DISCONNECT=delete_all (F1-registo 5.2)."""
+    dispara APPIUM_MCP_ON_CLIENT_DISCONNECT=delete_all."""
     sid = sess.session_id
     if not sid:
         return

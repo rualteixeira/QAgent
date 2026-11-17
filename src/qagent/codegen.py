@@ -1,8 +1,7 @@
-"""Gera um script Python + Appium standalone a partir de uma execução (docs/CPS-geracao-codigo-testes.md).
+"""Gera um script Python + Appium standalone a partir de uma execução.
 
-Determinístico, sem LLM: traduz as ações que FUNCIONARAM (result.json) e os passos estruturados do pedido
-(request.json). Estilo alinhado com o Selenium gerado pelo genai_fastapi: executável com `python script.py`,
-waits explícitos, pausa de 1 s entre passos.
+Determinístico, sem LLM: traduz as ações que funcionaram (result.json) e os passos estruturados do pedido
+(request.json). O script corre com `python script.py`, usa waits explícitos e faz uma pausa de 1 s entre passos.
 
 Segurança: segredos nunca entram no código — `{{secret:nome}}` → os.environ["QAGENT_SECRET_NOME"]; valores
 de chaves sensíveis mascarados no request.json ("***") → os.environ["TESTDATA_<CHAVE>"].
@@ -26,7 +25,7 @@ _BY = {
 }
 _KEYCODES = {"enter": 66, "delete": 67, "tab": 61, "search": 84, "escape": 111, "space": 62, "home": 3}
 _SKIP_TOOLS = {"list_apps", "look_at_screen", "get_screen", "appium_find_element"}
-# Recurso para execuções sem device.homePackage (gravadas antes de 2026-11-13 ou sem adb).
+# Recurso para execuções sem device.homePackage (execuções antigas ou sem adb).
 _LAUNCHER_HINTS = ("launcher", ".home")
 
 
@@ -88,7 +87,7 @@ def _loc_call(fn: str, strategy: str | None, selector: str | None, *extra: str,
 
 
 def _recorded_env(result) -> list[str]:
-    """G3: ambiente em que o caminho foi gravado (ajuda a perceber falhas do script noutro Android/versão)."""
+    """Ambiente em que o caminho foi gravado (ajuda a perceber falhas do script noutro Android/versão)."""
     dev = result.device
     parts = [p for p in (dev.model, f"Android {dev.platform_version}" if dev.platform_version else None) if p]
     lines = [f"Gravado em: {' · '.join(parts)}"] if parts else []
@@ -191,11 +190,10 @@ def _same_action(a: dict, b: dict) -> bool:
 def _drop_interruption_recovery(acts: list[dict], home: str | None = None) -> list[dict]:
     """Não reproduzir literalmente a recuperação de uma interrupção feita pelo agente.
 
-    Padrão: <ação X> → app_switched para OUTRA app (não pedido: não vem de open_app/launcher) →
+    Padrão: <ação X> → app_switched para outra app (não pedido: não vem de open_app/launcher) →
     open_app(de volta à app anterior) → app_switched (regresso) → <X repetida>. Na repetição a interrupção
     acontece de outra forma (ou não acontece), por isso remove-se a mudança, o regresso e a repetição de X;
-    o ensure_app() do script trata as interrupções que surgirem. (Validação 2026-11-12: o alarme do relógio
-    apareceu como notificação e o 2.º toque em "Create contact" já não fazia sentido.)"""
+    o ensure_app() do script trata as interrupções que surgirem."""
     out: list[dict] = []
     i = 0
     while i < len(acts):

@@ -1,6 +1,6 @@
-"""Ciclo de vida determinístico da sessão Appium, feito pelo orquestrador (CPS 7.3, regras 2–3).
+"""Ciclo de vida determinístico da sessão Appium, gerido pelo orquestrador.
 
-As sessões Appium são globais no servidor appium-mcp (F1-registo 5.1): depois de criada,
+As sessões Appium são globais no servidor appium-mcp: depois de criada,
 todas as chamadas passam o `sessionId` explicitamente.
 """
 
@@ -100,5 +100,5 @@ class AppiumSession:
         return out
 
     async def foreground_packages(self) -> set[str]:
-        """Packages no ecrã. Só pacotes de sistema = diálogo de sistema (ex.: ANR) — F0-registo 4.3."""
+        """Packages no ecrã. Só pacotes de sistema = diálogo de sistema (ex.: ANR)."""
         return self.packages_in(await self.page_source())

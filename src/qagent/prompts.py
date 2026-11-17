@@ -1,14 +1,14 @@
-"""Gestão centralizada de prompts (G2, auditoria 2026-11-13).
+"""Gestão centralizada de prompts.
 
-- Cada prompt tem uma VERSÃO; a versão usada fica registada no resultado (`promptVersions`).
+- Cada prompt tem uma versão; a versão usada fica registada no resultado (`promptVersions`).
 - Versões antigas mantêm-se para comparação (A/B) e reprodutibilidade; a omissão é DEFAULT_*.
-- Regras invioláveis: nenhum exemplo de app/domínio concreto (tests/test_prompts_app_agnostic.py) e as regras
+- Regras: nenhum exemplo de app/domínio concreto (tests/test_prompts_app_agnostic.py) e as regras
   críticas de execução são validadas no código, não só no prompt (qagent.agent.verdict).
 """
 
 from __future__ import annotations
 
-# Executor de passo — e1: texto acumulado até 2026-11-13 (referência para comparação).
+# Executor de passo — e1: primeira versão (mantida para comparação).
 EXECUTOR_E1 = """You are a test executor for native mobile apps. You do not know the app in advance:
 discover it from the screen descriptions. You execute exactly ONE test step, then call finish_step.
 

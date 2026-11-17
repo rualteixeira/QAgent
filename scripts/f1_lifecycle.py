@@ -1,6 +1,6 @@
-"""F1 — prova de ciclo de vida: N × (ligar MCP → create → screenshot → delete → fechar).
+"""Prova de ciclo de vida: N × (ligar MCP → create → screenshot → delete → fechar).
 
-Critério de conclusão (CPS 8): 10 ciclos sem sessões órfãs; sessão MCP única por execução.
+Critério de sucesso: 10 ciclos sem sessões órfãs; sessão MCP única por execução.
 
 Uso:
     uv run python scripts/f1_lifecycle.py --cycles 1
@@ -50,7 +50,7 @@ async def one_cycle(i: int, settings, caps: dict, run_dir: Path) -> dict:
                 rec["timings_ms"]["appium_create"] = ms(t)
                 rec["udid"] = sess.udid
 
-                # As tools LangChain usam a MESMA sessão MCP → veem a sessão Appium criada acima.
+                # As tools LangChain usam a mesma sessão MCP → veem a sessão Appium criada acima.
                 tools = {t.name: t for t in await conn.langchain_tools(
                     LLM_TOOL_ALLOWLIST | {"appium_session_management"})}
                 rec["llm_tools_exposed"] = sorted(n for n in tools if n in LLM_TOOL_ALLOWLIST)

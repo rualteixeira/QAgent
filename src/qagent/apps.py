@@ -1,7 +1,7 @@
 """Catálogo de apps do dispositivo (testes que referem apps pelo nome e mudam de app a meio).
 
 Só as apps com ícone no launcher (MAIN/LAUNCHER) — a lista completa do appium-mcp tem centenas de
-packages internos (providers, overlays…). Requer adb local; para dispositivos remotos (F6) cai para a
+packages internos (providers, overlays…). Requer adb local; para dispositivos remotos cai para a
 lista do appium-mcp com um filtro heurístico.
 """
 

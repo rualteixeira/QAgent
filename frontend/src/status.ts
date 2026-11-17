@@ -2,7 +2,7 @@ import type { ExecutionStatus, StepStatus } from "./types";
 
 type Color = "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning";
 
-// Rótulos ao estilo do testingOn web ("Executed"). ⚠️ Rótulos exatos de falha/não executado por confirmar (CPS 7.13).
+// Rótulos dos estados na interface (os de falha/não executado ainda podem mudar).
 export const STEP_LABEL: Record<StepStatus, { label: string; color: Color }> = {
   pending: { label: "Waiting", color: "default" },
   running: { label: "Running", color: "info" },

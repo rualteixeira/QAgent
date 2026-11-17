@@ -1,4 +1,4 @@
-"""F2 — executor de passo com LLM. Critério (CPS 8): passo executado em >= 4/5 tentativas; tokens medidos.
+"""Executor de passo com LLM. Critério de sucesso: passo executado em >= 4/5 tentativas; tokens medidos.
 
 Cada tentativa: sessão Appium nova → pré-condição determinística (ecrã de login) → passos NL com o LLM.
 
@@ -104,7 +104,7 @@ async def attempt(n: int, settings, params: LlmParams, run_dir) -> dict:
 
 async def main() -> int:
     ap = argparse.ArgumentParser()
-    # O antigo modo "fake" (guião fixo) foi retirado: o ciclo do executor é coberto por tests/test_executor_loop.py.
+    # Sem provider "fake" aqui: o ciclo com LLM simulado está em tests/test_executor_loop.py.
     ap.add_argument("--provider", choices=["gemini", "azure"], default="azure")
     ap.add_argument("--model", default=None)
     ap.add_argument("--attempts", type=int, default=5)

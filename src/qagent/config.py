@@ -1,4 +1,4 @@
-"""Configuração do QAgent (CPS 7.7). O .env é carregado explicitamente."""
+"""Configuração do QAgent. O .env é carregado explicitamente."""
 
 from __future__ import annotations
 
@@ -18,13 +18,13 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="QAGENT_", extra="ignore")
 
     runs_dir: Path = PROJECT_ROOT / "runs"
-    # G6: apagar no arranque da API as execuções terminadas há mais de N dias (runs/<id>/). 0 = nunca (omissão:
+    # Apagar no arranque da API as execuções terminadas há mais de N dias (runs/<id>/). 0 = nunca (omissão:
     # apagar evidência é irreversível, por isso é opt-in). As pastas de fases (f0, f5, codegen…) nunca são tocadas.
     runs_retention_days: int = 0
     capabilities_config: Path = PROJECT_ROOT / "config" / "capabilities.json"
     appium_mcp_version: str = "1.99.3"
 
-    # F0: o arranque stdio demora ~33 s → servidor HTTP de longa duração (F0-registo 4.3).
+    # O arranque em stdio demora ~33 s; por isso a omissão é um servidor HTTP de longa duração.
     mcp_transport: Literal["http", "stdio"] = "http"
     mcp_http_url: str = "http://127.0.0.1:8080/sse"
 
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     android_home: str = r"C:\Android\Sdk"
     java_home: str = r"C:\Android\JDK"
 
-    # API (F4). Sem chave por omissão: se vazio, as rotas protegidas respondem 503.
+    # API. Sem chave por omissão: se vazio, as rotas protegidas respondem 503.
     api_keys: str = ""
     cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000"
     ios_remote_server_url: str | None = None

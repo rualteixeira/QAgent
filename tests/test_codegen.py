@@ -197,7 +197,7 @@ def test_home_screen_is_recognised_by_the_device_home_package_not_by_name():
                         steps=[s], device=DeviceInfo(udid="emulator-5554", home_package="com.vendor.home"))
     body = generate_python_script(r, {"testExecution": "t", "platform": "android"}).split("def run_test")[1]
     assert "com.vendor.home:id/cell" not in body          # toque no ecrã inicial antes de open_app: omitido
-    assert "com.example.homebanking:id/menu" in body      # ".home" no nome NÃO faz dele o ecrã inicial
+    assert "com.example.homebanking:id/menu" in body      # ".home" no nome não faz dele o ecrã inicial
 
 
 def test_wait_stable_and_find_scrolls_into_view():

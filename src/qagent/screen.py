@@ -1,10 +1,10 @@
 """Modelo do ecrã para o LLM, construído a partir do XML da página (UiAutomator2). Agnóstico à app.
 
-Princípios (fase de generalização, 2026-11-12):
+Princípios:
 - Nada de conhecimento de apps concretas: só a estrutura Android (classes, texto, content-desc,
   resource-id, flags e posição).
-- TODOS os elementos interativos entram, incluindo os só-ícone sem rótulo (comuns em banca/fintech,
-  Flutter/React Native mal anotados), com posição e o nome do resource-id como pista.
+- Entram todos os elementos interativos, incluindo os só-ícone sem rótulo (comuns em apps Flutter/React
+  Native mal anotadas), com posição e o nome do resource-id como pista.
 - O LLM refere elementos por `ref` (e1, e2…). O QAgent converte a ref no locator mais estável:
   accessibility id > id > texto (uiautomator) > resourceId+instance (frágil) > coordenadas (frágil).
   O LLM nunca escreve locators → não os pode inventar.
@@ -21,7 +21,7 @@ from qagent.models import Locator
 
 SYSTEM_PACKAGES = frozenset({"android", "com.android.systemui"})
 # Diálogos de erro do Android ("app isn't responding" / "app has stopped"): os resource-ids aerr_*
-# não dependem do idioma. Outras sobreposições do sistema (notificações, dicas, permissões) NÃO são erro.
+# não dependem do idioma. Outras sobreposições do sistema (notificações, dicas, permissões) não são erro.
 ERROR_DIALOG_ID_PREFIX = "android:id/aerr_"
 
 
@@ -203,7 +203,7 @@ def parse_screen(xml: str, max_elements: int = MAX_ELEMENTS) -> Screen:
                     el.locator, el.fragile = _best_locator(el, desc_count, rid_count, text_count,
                                                            rid_seen[rid] - 1 if rid else 0)
                     elements.append(el)
-                    # Só contentores ACIONÁVEIS sem rótulo herdam o texto dos filhos (ex.: item de lista).
+                    # Só contentores acionáveis sem rótulo herdam o texto dos filhos (ex.: item de lista).
                     # Um contentor que só faz scroll não: o texto (ex.: mensagem de erro) tem de ficar visível.
                     actionable = el.clickable or el.long_clickable or el.checkable
                     if actionable and not (text or desc):
@@ -303,7 +303,7 @@ def _inside(a: Bounds, b: Bounds) -> bool:
 
 
 def free_point(target: Bounds, clickables: list[Bounds]) -> tuple[int, int] | None:
-    """Ponto onde tocar no alvo quando o seu CENTRO está tapado por outro elemento clicável que não é o próprio,
+    """Ponto onde tocar no alvo quando o seu centro está tapado por outro elemento clicável que não é o próprio,
     nem quem o contém, nem algo dentro dele (ex.: botão flutuante ou barra fixa por cima de uma lista).
     None = centro livre (tocar normalmente) ou nenhum ponto livre (tocar normalmente; nada a fazer)."""
     cx, cy = (target[0] + target[2]) // 2, (target[1] + target[3]) // 2

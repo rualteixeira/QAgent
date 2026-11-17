@@ -1,4 +1,4 @@
-"""F5 — N execuções seguidas de um pedido (CA5 estabilidade, CA6 custo/tempo, CA7 locators).
+"""N execuções seguidas de um pedido, para medir estabilidade, custo/tempo e locators.
 
 Uso: python scripts/f5_batch.py examples/ca2-texto-livre-login.json --runs 10 [--provider azure] [--label baseline]
 Grava runs/f5/<timestamp>-<label>/summary.json. A chave LLM vem das variáveis de utilizador (nunca impressa).

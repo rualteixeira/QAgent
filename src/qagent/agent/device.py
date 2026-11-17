@@ -46,7 +46,7 @@ class Device:
         return self.screen
 
     def element_at(self, x: int, y: int) -> UiElement | None:
-        """Elemento LISTADO mais interior (menor área) que contém o ponto."""
+        """Elemento listado mais interior (menor área) que contém o ponto."""
         inside = [e for e in (self.screen.elements if self.screen else [])
                   if e.bounds[0] <= x <= e.bounds[2] and e.bounds[1] <= y <= e.bounds[3]]
         return min(inside, key=lambda e: (e.bounds[2] - e.bounds[0]) * (e.bounds[3] - e.bounds[1]), default=None)

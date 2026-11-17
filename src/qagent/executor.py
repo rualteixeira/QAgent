@@ -1,8 +1,8 @@
 """Executores de passo.
 
-- StructuredExecutor: passos determinísticos (F4, sem LLM). Usa sempre `sessionId` explícito,
-  porque as sessões Appium são globais no servidor appium-mcp (F1-registo 5.1).
-- O executor com LLM (F2) implementa o mesmo protocolo `StepExecutor`.
+- StructuredExecutor: passos determinísticos (sem LLM). Usa sempre `sessionId` explícito,
+  porque as sessões Appium são globais no servidor appium-mcp.
+- O executor com LLM implementa o mesmo protocolo `StepExecutor`.
 """
 
 from __future__ import annotations
@@ -112,7 +112,7 @@ class StructuredExecutor:
                 result.reason = f"Texto {shown} introduzido ({loc.strategy} = {loc.value!r})."
             case "scroll_to":
                 # 2 tentativas: logo após uma transição (ex.: menu a abrir) o appium-mcp vê
-                # "page source did not change" e desiste (F2, 2026-11-11).
+                # "page source did not change" e desiste.
                 for attempt in (1, 2):
                     try:
                         await self._call(result, "appium_gesture", {

@@ -1,4 +1,4 @@
-// Cliente da API do QAgent (CPS 7.9). Sem lógica de negócio: só HTTP.
+// Cliente da API do QAgent. Sem lógica de negócio: só HTTP.
 import type { Device, ExecutionListItem, ExecutionResult, LlmConfig, TestExecutionInput } from "./types";
 
 const BASE = (import.meta.env.VITE_QAGENT_API_URL as string | undefined) ?? "http://127.0.0.1:8100";
@@ -19,7 +19,7 @@ function detailToText(detail: unknown): string {
 
 function headers(llm?: LlmConfig): HeadersInit {
   const h: Record<string, string> = { "X-API-Key": KEY };
-  // A chave LLM só viaja por cabeçalho e nunca é guardada no browser (CPS 7.13).
+  // A chave LLM só viaja por cabeçalho e nunca é guardada no browser.
   if (llm && llm.provider !== "none") {
     h["X-Provider"] = llm.provider;
     if (llm.model) h["X-LLM-Model"] = llm.model;

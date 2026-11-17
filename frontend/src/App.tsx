@@ -19,7 +19,7 @@ type InputMode = "manual" | "gherkin" | "structured";
 const POLL_MS = 1500;
 
 
-/** "Given/When/Then/And/But …" por linha → scenario do genai_fastapi. */
+/** Uma linha "Given/When/Then/And/But …" por passo → scenario Gherkin do pedido. */
 function parseGherkin(text: string): TestExecutionInput["scenario"] {
   let name = "Scenario";
   const steps: GherkinStep[] = [];
@@ -38,8 +38,8 @@ function parseGherkin(text: string): TestExecutionInput["scenario"] {
   return { name, scenario: steps };
 }
 
-// Configuração do GenAI Server guardada pelo PRÓPRIO utilizador (botão "Save").
-// A chave nunca é guardada (CPS 7.13). localStorage pode falhar (modo privado, bloqueio) → try/catch.
+// Configuração do GenAI Server guardada pelo próprio utilizador (botão "Save").
+// A chave nunca é guardada. localStorage pode falhar (modo privado, bloqueio) → try/catch.
 const SETTINGS_KEY = "qagent.genaiServer";
 const EMPTY_LLM: LlmConfig = { provider: "none", model: "", apiKey: "", endpoint: "", apiVersion: "" };
 
@@ -117,7 +117,7 @@ export default function App() {
 
   useEffect(() => { loadDevices(); loadHistory(); }, [loadDevices, loadHistory]);
 
-  // Polling do estado (CPS 7.13: 1–2 s).
+  // Polling do estado.
   const stopPolling = () => { if (pollRef.current) window.clearInterval(pollRef.current); pollRef.current = null; };
   const startPolling = useCallback((id: string) => {
     stopPolling();
@@ -228,7 +228,7 @@ export default function App() {
                      placeholder={llm.provider === "azure" ? "deployment name" : llm.provider === "gemini" ? "model name" : ""}
                      slotProps={{ inputLabel: { shrink: llm.provider !== "none" || !!llm.model } }}
                      onChange={(e) => setLlm({ ...llm, model: e.target.value })} sx={{ width: 170 }} />
-          {/* A chave LLM fica só em memória (nunca em localStorage) — CPS 7.13. */}
+          {/* A chave LLM fica só em memória (nunca em localStorage). */}
           <TextField size="small" label="LLM API key" type="password" value={llm.apiKey}
                      disabled={llm.provider === "none"} autoComplete="off"
                      onChange={(e) => setLlm({ ...llm, apiKey: e.target.value })} sx={{ width: 180 }} />
@@ -259,7 +259,7 @@ export default function App() {
                 <InputLabel>Platform</InputLabel>
                 <Select label="Platform" value="android">
                   <MenuItem value="android">Android</MenuItem>
-                  <MenuItem value="ios" disabled>iOS (F6)</MenuItem>
+                  <MenuItem value="ios" disabled>iOS (not supported yet)</MenuItem>
                 </Select>
               </FormControl>
               <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", minWidth: 260 }}>
@@ -331,7 +331,7 @@ export default function App() {
               <>
                 <Alert severity="info" sx={{ mb: 2 }}>
                   Needs a GenAI Server. Each Given/When/Then line becomes one step (no extra LLM call to
-                  split them). Same format as the genai_fastapi /testCase output.
+                  split them).
                 </Alert>
                 <TextField label="Gherkin scenario" multiline minRows={5} fullWidth
                            placeholder={["Scenario: …", "Given …", "When …", "Then …"].join("\n")}

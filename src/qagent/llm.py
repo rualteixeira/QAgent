@@ -1,6 +1,6 @@
-"""Fábrica de LLM agnóstica ao provider (CPS 6.2, 7.9): escolhida pelos cabeçalhos X-Provider / X-LLM-*.
+"""Fábrica de LLM agnóstica ao provider, escolhida pelos cabeçalhos X-Provider / X-LLM-*.
 
-Providers: gemini (ponte, F2), azure (alvo), fake (testes da "canalização" sem quota).
+Providers: gemini, azure e fake (testes sem gastar quota).
 """
 
 from __future__ import annotations

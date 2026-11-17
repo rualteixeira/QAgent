@@ -44,8 +44,8 @@ def _compact_text(text: str) -> str:
 
 
 def compact_old_screens(messages: list) -> None:
-    """F5 (custo): cada ação devolve o ecrã completo e os anteriores ficavam todos no histórico do passo.
-    Só o mais recente é útil (as refs mudam a cada ecrã) → substituir os anteriores por um marcador."""
+    """Poupa tokens: cada ação devolve o ecrã completo, mas só o mais recente é útil (as refs mudam a cada
+    ecrã). Os anteriores são substituídos por um marcador."""
     for i, msg in enumerate(messages):
         content = msg.content if isinstance(msg.content, str) else None
         if not content or _OMITTED in content:

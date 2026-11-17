@@ -164,7 +164,7 @@ export function ResultPanel({ result, stopping, onStop }: Props) {
       <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", rowGap: 1 }}>
         <GenerateCode executionId={result.executionId}
                       enabled={done && result.status !== "cancelled" && result.steps.length > 0} />
-        {/* Fora de âmbito no protótipo (CPS 7.13): visíveis para paridade com o testingOn. */}
+        {/* Fora de âmbito no protótipo: visíveis, mas desativados. */}
         {["Save Test", "Save Execution"].map((l) => (
           <Tooltip key={l} title="Out of scope in the prototype">
             <span><Button variant="outlined" disabled>{l}</Button></span>

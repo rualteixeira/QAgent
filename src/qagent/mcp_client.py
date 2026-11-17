@@ -1,4 +1,4 @@
-"""Cliente MCP com UMA sessão persistente por execução (CPS 7.3, regra 1).
+"""Cliente MCP com uma única sessão persistente por execução.
 
 Uso:
     async with McpConnection(settings, run_dir) as conn:
@@ -23,7 +23,7 @@ from mcp.client.streamable_http import streamable_http_client
 
 from qagent.config import Settings
 
-# Ferramentas que o executor de passo (LLM) pode usar — CPS 7.7 + F0-registo 4.4.
+# Ferramentas do appium-mcp que o executor de passo (LLM) pode usar.
 # Gestão de sessão, instalação, permissões, ficheiros e preparação iOS ficam no orquestrador.
 LLM_TOOL_ALLOWLIST: frozenset[str] = frozenset(
     {
@@ -153,6 +153,6 @@ class McpConnection:
         return call
 
     async def langchain_tools(self, allowlist: frozenset[str] = LLM_TOOL_ALLOWLIST) -> list[BaseTool]:
-        """Ferramentas LangChain ligadas a ESTA sessão MCP (não abrem sessões novas)."""
+        """Ferramentas LangChain ligadas a esta sessão MCP (não abrem sessões novas)."""
         tools = await load_mcp_tools(self.session)
         return [t for t in tools if t.name in allowlist]

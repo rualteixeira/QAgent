@@ -254,7 +254,7 @@ class StepTools:
 
     def _to_screen(self, x: int, y: int, *, prefer_ref: bool) -> tuple[int, int]:
         """Posição da captura → ecrã real (a captura pode estar reduzida). Com prefer_ref, um ponto dentro de um
-        controlo LISTADO e pequeno é recusado: deve usar-se a ref (localizador estável)."""
+        controlo listado e pequeno é recusado: deve usar-se a ref (localizador estável)."""
         if not self.st.shot_size:
             raise ToolMisuse("call look_at_screen first: positions are only for content you can see in the "
                              "screenshot but that is not listed in the screen description")

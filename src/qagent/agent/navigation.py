@@ -1,4 +1,4 @@
-"""Apps instaladas e abertura de apps (testes com várias apps, identificadas pelo nome). Estado por EXECUÇÃO:
+"""Apps instaladas e abertura de apps (testes com várias apps, identificadas pelo nome). Estado por execução:
 cache da lista de apps e apps já abertas (arranque a frio só na 1.ª abertura)."""
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ _GENERIC_SEGMENTS = {"com", "org", "net", "io", "co", "android", "google", "apps
 
 def package_matches_step(package: str, instruction: str) -> bool:
     """True se uma palavra do passo (≥4 caracteres, qualquer língua) e uma parte do package se contêm uma à
-    outra. Só serve para um AVISO ao modelo (nunca recusa): falsos positivos apenas suprimem o aviso."""
+    outra. Só serve para um aviso ao modelo (nunca recusa): falsos positivos apenas suprimem o aviso."""
     words = {w for w in re.findall(r"\w{4,}", (instruction or "").lower()) if not w.isdigit()}
     parts = {p for p in re.split(r"[._]", package.lower()) if len(p) >= 3 and p not in _GENERIC_SEGMENTS}
     return any(w in p or (len(p) >= 4 and p in w) for w in words for p in parts)

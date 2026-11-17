@@ -1,4 +1,4 @@
-"""G1 — ciclo do executor LLM (AiStepExecutor) com appium-mcp e LLM simulados.
+"""Ciclo do executor LLM (AiStepExecutor) com appium-mcp e LLM simulados.
 
 Cobre as regras críticas de veredicto: ação real nos WHEN, `how` declarado, verificação estruturada nos THEN,
 orçamento de ações, repetições, pedido de intervenção humana e segredos. Ecrã: XML real gravado (login com erro):
@@ -211,7 +211,7 @@ def test_tool_error_from_appium_is_reported_not_crashing():
 
 
 def test_when_failed_after_successful_actions_is_challenged_once():
-    # CA3: o modelo falhou o WHEN por ver a mensagem de erro; é contestado e passa (o THEN é que verifica).
+    # O modelo falhou o WHEN por ver a mensagem de erro; é contestado e passa (o THEN é que verifica).
     ex, _, _ = make([call("tap", 1, ref="e14"),
                      call("finish_step", 2, status="failed", reason="apareceu erro de bloqueio"),
                      call("finish_step", 3, status="passed", reason="Login tocado.")])
@@ -234,7 +234,7 @@ def test_when_failed_with_failed_action_is_not_challenged():
 
 
 def test_then_failed_but_expected_assertion_holds_is_challenged_once():
-    # G3: o modelo diz que falhou, mas a sua própria asserção esperada verifica-se no ecrã relido.
+    # O modelo diz que falhou, mas a sua própria asserção esperada verifica-se no ecrã relido.
     ex, _, _ = make([call("finish_step", 1, status="failed", reason="não aparece o erro",
                           assertion={"kind": "text_equals", "ref": "e13", "text": ERROR_TEXT}),
                      call("finish_step", 2, status="passed", reason="o erro aparece",

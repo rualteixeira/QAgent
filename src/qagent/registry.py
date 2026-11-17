@@ -1,4 +1,4 @@
-"""Registo de execuções: memória + runs/<id>/result.json (consultável após reinício) — CPS 7.9."""
+"""Registo de execuções: memória + runs/<id>/result.json (consultável após reinício)."""
 
 from __future__ import annotations
 
@@ -24,11 +24,11 @@ class Registry:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.items: dict[str, Execution] = {}
-        # G3: um bloqueio por dispositivo (udid); "" = sem dispositivo identificado.
+        # Um bloqueio por dispositivo (udid); "" = sem dispositivo identificado.
         self.device_locks: dict[str, asyncio.Lock] = {}
 
     def prune_old_runs(self, now: datetime | None = None) -> list[str]:
-        """G6: retenção. Só pastas de execução (id de 12 hex) com result.json TERMINADO há mais de
+        """Retenção. Só pastas de execução (id de 12 hex) com result.json terminado há mais de
         runs_retention_days; nunca as em curso, as ilegíveis ou as pastas das fases."""
         days = self.settings.runs_retention_days
         if days <= 0:

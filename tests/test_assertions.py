@@ -54,6 +54,6 @@ def test_free_point_avoids_a_floating_button_over_the_target():
     x, y = free_point(target, [card, fab])
     assert 213 <= x <= 268 and 483 <= y <= 501 and not (236 <= x <= 292 and 476 <= y <= 532)
     assert free_point(target, [card]) is None                       # só o cartão que o contém: centro livre
-    assert free_point((0, 0, 10, 10), [(0, 0, 9, 9)]) is None                  # algo DENTRO do alvo: não tapa
+    assert free_point((0, 0, 10, 10), [(0, 0, 9, 9)]) is None                  # algo dentro do alvo: não tapa
     assert free_point((0, 0, 10, 10), [(4, 4, 20, 6)]) == (2, 5)            # barra sobre o centro → ponto livre
     assert free_point((236, 476, 292, 532), [(200, 400, 300, 600)]) is None   # contido noutro: não é tapado

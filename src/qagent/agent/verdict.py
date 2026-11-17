@@ -67,14 +67,14 @@ class VerdictJudge:
         return None
 
     async def validate(self, verdict: FinishArgs, history: list, tester_acted: bool) -> str | None:
-        """Regras do veredicto, por esta ordem (G1, 2026-11-13: a regra genérica 'nada feito' avaliada primeiro
-        anulava as específicas — um THEN com asserção correta ou um WHEN com how declarado eram recusados).
+        """Regras do veredicto, por esta ordem. A regra genérica 'nada feito' fica no fim: avaliada primeiro,
+        recusaria um THEN com asserção correta ou um WHEN com `how` declarado.
         Devolve a mensagem de rejeição para o LLM, None se aceite; PreexistingState → erro de ambiente."""
         st, result = self.st, self.result
         if (verdict.status == "failed" and st.is_when and st.action_successes > 0
                 and st.action_failures == 0 and not st.when_fail_challenged):
-            # G1 (2026-11-13, CA3): o modelo falhou um WHEN cujas ações correram todas bem por julgar o resultado
-            # de negócio (isso é do THEN seguinte). Contestar UMA vez; se insistir, aceita-se (pode haver motivo).
+            # O modelo falhou um WHEN cujas ações correram todas bem por julgar o resultado
+            # de negócio (isso cabe ao THEN seguinte). Contestar uma vez; se insistir, aceita-se (pode haver motivo).
             st.when_fail_challenged = True
             return ("Check: this is an action step ([WHEN]) and all its actions succeeded. Judge only whether the "
                     "action could be performed; whatever the screen shows afterwards (including any message) is "
@@ -96,8 +96,8 @@ class VerdictJudge:
         if verdict.assertion is None:
             if st.then_fail_challenged:
                 return None
-            # G3: sem a asserção esperada a falha fica só no juízo do LLM (outcome inconclusive) e o script
-            # gerado não a reproduz. Pedir UMA vez; se o modelo insistir sem ela, aceita-se.
+            # Sem a asserção esperada a falha fica só no juízo do LLM (outcome inconclusive) e o script
+            # gerado não a reproduz. Pedir uma vez; se o modelo insistir sem ela, aceita-se.
             st.then_fail_challenged = True
             return ("Check: add `assertion` = the machine-checkable check of what was EXPECTED (e.g. visible with "
                     "the expected text). It is re-checked on a fresh screen and must NOT hold; then finish failed "
@@ -106,8 +106,8 @@ class VerdictJudge:
             spec = assertion_spec(verdict.assertion, self.d)
         except ToolMisuse:
             return None
-        # G3: confirmar a falha num ecrã relido. Se o esperado afinal se verifica, o veredicto contradiz o
-        # ecrã → contestar UMA vez. "not_met" = falha verificada pela máquina (outcome verified).
+        # Confirmar a falha num ecrã relido. Se o esperado afinal se verifica, o veredicto contradiz o
+        # ecrã → contestar uma vez. "not_met" = falha verificada pela máquina (outcome verified).
         ok, observed = verify_assertion(await self.d.read_screen(), spec)
         if ok and not st.then_fail_challenged:
             st.then_fail_challenged = True
@@ -120,7 +120,7 @@ class VerdictJudge:
     def _validate_when_how(self, verdict: FinishArgs, history: list, tester_acted: bool) -> str | None:
         if verdict.how == "already_true_before_test" and not self.st.preexisting_challenged:
             # O modelo pode tomar dados já existentes (contadores, registos, app já aberta) como "a ação já estava
-            # feita" e não agir. Contestar UMA vez; se insistir, aceita-se e é erro de ambiente (ex.: criar um
+            # feita" e não agir. Contestar uma vez; se insistir, aceita-se e é erro de ambiente (ex.: criar um
             # registo único que já existe).
             self.st.preexisting_challenged = True
             return ("Check: this action step asks you to DO something now. Data that already exists (items, "

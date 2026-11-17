@@ -1,4 +1,4 @@
-// Espelho do contrato da API (src/qagent/models.py; CPS 7.4 / 7.5).
+// Espelho do contrato da API (src/qagent/models.py).
 
 export type StepStatus = "pending" | "running" | "passed" | "failed" | "skipped" | "error";
 export type ExecutionStatus = "queued" | "running" | "waiting_for_user" | "passed" | "failed" | "error" | "cancelled";
@@ -85,7 +85,7 @@ export interface Device {
   remoteServerUrl?: string;
 }
 
-/** Cabeçalhos X-Provider / X-LLM-* (convenção do genai_fastapi). Só usados a partir da F2. */
+/** Cabeçalhos X-Provider / X-LLM-* enviados à API. */
 export interface LlmConfig {
   provider: "none" | "azure" | "gemini";
   model: string;

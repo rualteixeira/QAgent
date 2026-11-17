@@ -4,22 +4,22 @@ version = "0.1.0"
 description = "QAgent — execução autónoma de testes mobile nativos via appium-mcp"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    # Alinhado com o genai_fastapi (CPS 3.1). Resolução validada na F1 (2026-11-11).
+    # Versões fixas: esta combinação foi validada em conjunto.
     "langchain-core==0.3.46",
     "langchain-openai==0.3.1",
     "langchain-google-genai==2.1.0",
     "langgraph>=0.5,<0.6",
     # 0.2.0 declara langchain-core>=0.3.36 mas importa langchain_core.messages.content
-    # (inexistente no 0.3.46) → ModuleNotFoundError. 0.1.14 é o último compatível (F1, 2026-11-11).
+    # (inexistente no 0.3.46) → ModuleNotFoundError. 0.1.14 é o último compatível.
     "langchain-mcp-adapters==0.1.14",
     # Sem teto, o resolver pode escolher mcp 2.x (major nova, não validada).
     "mcp>=1.30,<2",
-    # NÃO alinhar com o pydantic 2.10.6 do genai_fastapi: o mcp >= 1.13 exige pydantic >= 2.11
-    # (com 2.10 o resolver desce o mcp para 1.12.4, sem streamable_http_client). F4, 2026-11-11.
+    # O mcp >= 1.13 exige pydantic >= 2.11 (com 2.10 o resolver desce o mcp para 1.12.4,
+    # que não tem streamable_http_client).
     "pydantic>=2.11,<3",
     "pydantic-settings>=2.6,<3",
     "python-dotenv>=1.0",
-    # F4 — API. Mesma linha do genai_fastapi (FastAPI 0.115.x).
+    # API
     "fastapi>=0.115,<0.116",
     "uvicorn>=0.30",
 ]
@@ -37,7 +37,7 @@ pythonpath = ["src"]
 # FastAPI 0.115 + pydantic >= 2.12: avisos inofensivos sobre aliases em Field() dos modelos de corpo.
 filterwarnings = [
     "ignore::pydantic.warnings.UnsupportedFieldAttributeWarning",
-    # langchain-core 0.3.46 (fixado pelo genai_fastapi) + pydantic 2.14: avisos de depreciação inofensivos.
+    # langchain-core 0.3.46 + pydantic 2.14: avisos de depreciação inofensivos.
     "ignore::pydantic.warnings.PydanticDeprecatedSince211",
 ]
 

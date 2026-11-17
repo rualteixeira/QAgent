@@ -1,4 +1,4 @@
-"""Contrato da API (CPS 7.4 entrada, 7.5 saída). Saída = superconjunto do ResultOutput do genai_fastapi."""
+"""Contrato da API: modelos de entrada e de saída."""
 
 from __future__ import annotations
 
@@ -34,13 +34,13 @@ StepAction = Literal["tap", "type", "scroll_to", "assert_visible", "assert_text"
 
 
 class StructuredStep(_Camel):
-    """Passo determinístico (sem LLM). Base do modo F4 e de uma futura entrada *keyword* do testingOn.
+    """Passo determinístico (sem LLM).
 
     - tap / scroll_to / assert_visible: `locator`
     - type: `locator` + `text` (aceita `{{testData.<chave>}}`)
     - assert_text: `locator` + `text` (igualdade; `contains=true` para substring)
     - back: sem campos; wait: `timeoutSec` = segundos de espera
-    - ai (F2): `text` = instrução em linguagem natural, executada pelo LLM (cabeçalhos X-Provider/X-LLM-*)
+    - ai: `text` = instrução em linguagem natural, executada pelo LLM (cabeçalhos X-Provider/X-LLM-*)
     """
     name: str | None = None
     action: StepAction
@@ -96,7 +96,7 @@ class Options(_Camel):
     report_language: str = Field("European Portuguese (pt-PT)", max_length=60)
     # Versão do prompt do executor (A/B e reprodutibilidade); omissão: prompts.DEFAULT_EXECUTOR.
     prompt_version: Literal["e1", "e2", "e3"] | None = None
-    # G3: novas tentativas SÓ para falhas de infraestrutura antes dos passos (ligação ao appium-mcp, criação
+    # Novas tentativas só para falhas de infraestrutura antes dos passos (ligação ao appium-mcp, criação
     # da sessão). Nunca se repete um passo: as ações não são idempotentes e uma falha da app não se "corrige".
     infra_retries: int = Field(1, ge=0, le=3)
 
@@ -130,10 +130,10 @@ class TestExecutionInput(_Camel):
 # ---------- Saída ----------
 
 StepStatus = Literal["pending", "running", "passed", "failed", "skipped", "error"]
-# CA5: classificação das falhas. app = a app não fez o esperado; environment = dispositivo/estado/humano;
+# Classificação das falhas. app = a app não fez o esperado; environment = dispositivo/estado/humano;
 # llm = provider ou executor LLM; appium_mcp = automação (appium-mcp/Appium).
 FailureCategory = Literal["app", "environment", "llm", "appium_mcp"]
-# G3: força da evidência do veredicto de um passo (aditivo ao status).
+# Força da evidência do veredicto de um passo (aditivo ao status).
 # verified = confirmado por uma verificação da máquina num ecrã relido (asserção, espera por texto, passo assert_*);
 # executed = a ação foi feita, mas o resultado não foi verificado pela máquina (fica para um THEN seguinte);
 # inconclusive = o veredicto assenta só no juízo do LLM, ou o passo terminou em erro (nada se concluiu sobre a app).
@@ -143,7 +143,7 @@ TERMINAL: frozenset[str] = frozenset({"passed", "failed", "error", "cancelled"})
 
 
 class ElementSignature(_Camel):
-    """Elemento tocado por COORDENADAS (sem locator estável): o script gerado confirma, antes de tocar, que o
+    """Elemento tocado por coordenadas (sem locator estável): o script gerado confirma, antes de tocar, que o
     mesmo elemento está nesse ponto — senão falha ("ecrã diferente da gravação") em vez de tocar às cegas."""
     cls: str
     bounds: list[int] = Field(min_length=4, max_length=4)
@@ -156,7 +156,7 @@ class ActionRecord(_Camel):
     strategy: str | None = None
     selector: str | None = None
     result: str
-    # Para gerar código: texto escrito como TEMPLATE (com {{testData.x}}, nunca o valor de um segredo),
+    # Para gerar código: texto escrito como template (com {{testData.x}}, nunca o valor de um segredo),
     # texto observado numa leitura (mascarado), duração de esperas, etc.
     value: str | None = None
     # Só em ações por coordenadas: o elemento que estava nesse ponto na execução original.
@@ -223,9 +223,9 @@ class ExecutionResult(_Camel):
     device: DeviceInfo = Field(default_factory=DeviceInfo)
     failure_category: FailureCategory | None = None
     prompt_versions: dict[str, str] = Field(default_factory=dict)
-    # G3: versão (versionName) de cada app usada no teste, lida no dispositivo — para reproduzir/triar falhas.
+    # Versão (versionName) de cada app usada no teste, lida no dispositivo — para reproduzir/triar falhas.
     app_versions: dict[str, str] = Field(default_factory=dict)
-    # G3: contagem dos passos por outcome (verified/executed/inconclusive).
+    # Contagem dos passos por outcome (verified/executed/inconclusive).
     outcomes: dict[str, int] = Field(default_factory=dict)
     created_at: str
     started_at: str | None = None

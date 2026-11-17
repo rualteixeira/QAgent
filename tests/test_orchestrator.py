@@ -1,5 +1,5 @@
-"""G1 — orquestrador + grafo com appium-mcp simulado: limpeza da sessão, stopOnFailure, verificação do
-dispositivo e classificação das falhas (CA5)."""
+"""Orquestrador + grafo com appium-mcp simulado: limpeza da sessão, stopOnFailure, verificação do
+dispositivo e classificação das falhas."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ class _Res:
 class FakeMcp:
     instances: list["FakeMcp"] = []
 
-    create_failures_left = 0  # G3: falhar a criação da sessão N vezes (entre ligações) e depois funcionar
+    create_failures_left = 0  # falhar a criação da sessão N vezes (entre ligações) e depois funcionar
 
     def __init__(self, *a, create_error: str | None = None, **kw) -> None:
         self.calls: list[tuple[str, dict]] = []
@@ -117,7 +117,7 @@ def test_functional_failure_stops_skips_rest_and_cleans_up(monkeypatch, tmp_path
     assert r.status == "failed" and r.failure_category == "app" and r.steps[1].failure_category == "app"
     assert "locked out" in r.steps[1].reason                      # o texto observado vai no motivo
     assert FakeMcp.instances[0].did("appium_session_management", action="delete")
-    assert [s.outcome for s in r.steps] == ["executed", "verified", None]   # G3
+    assert [s.outcome for s in r.steps] == ["executed", "verified", None]
     assert r.outcomes == {"executed": 1, "verified": 1} and r.metrics.infra_retries == 0
     assert (r.device.platform_version, r.device.model) == ("16", "sdk_gphone64")
 

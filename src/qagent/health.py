@@ -1,4 +1,4 @@
-"""/health (com cache) e /mobile/devices — CPS 7.9."""
+"""/health (com cache) e /mobile/devices."""
 
 from __future__ import annotations
 
@@ -46,8 +46,8 @@ async def adb_devices() -> list[dict]:
 
 
 async def device_precheck(udid: str | None, timeout: float = 10) -> str | None:
-    """G1: falhar depressa e com mensagem acionável quando o dispositivo não responde (antes: 20–240 s e um
-    erro técnico do Appium). Devolve None se estiver pronto, senão a explicação."""
+    """Falha depressa, com uma mensagem útil, quando o dispositivo não responde (o Appium sozinho demora
+    20–240 s e devolve um erro técnico). Devolve None se estiver pronto, senão a explicação."""
     devices = [d for d in await adb_devices() if d["state"] == "device"]
     if not devices:
         return "Nenhum dispositivo Android ligado/pronto (adb devices vazio). Arranque o emulador ou ligue o dispositivo."
@@ -65,14 +65,14 @@ async def device_precheck(udid: str | None, timeout: float = 10) -> str | None:
 
 
 async def first_ready_device() -> str | None:
-    """G3: dispositivo efetivo quando o pedido não indica udid (para o bloqueio por dispositivo e para que o
+    """Dispositivo efetivo quando o pedido não indica udid (para o bloqueio por dispositivo e para que o
     select_device não tenha de escolher)."""
     ready = [d["udid"] for d in await adb_devices() if d["state"] == "device"]
     return ready[0] if ready else None
 
 
 async def device_props(udid: str) -> dict[str, str]:
-    """G3: versão do Android e modelo (para o relatório). Vazio se o adb não responder."""
+    """Versão do Android e modelo (para o relatório). Vazio se o adb não responder."""
     out: dict[str, str] = {}
     for key, prop in (("platformVersion", "ro.build.version.release"), ("model", "ro.product.model")):
         rc, val = await _run("adb", "-s", udid, "shell", "getprop", prop, timeout=5)
@@ -85,7 +85,7 @@ _VERSION_RE = re.compile(r"versionName=(\S+)")
 
 
 async def app_versions(udid: str, packages: list[str]) -> dict[str, str]:
-    """G3: versionName de cada package instalado (genérico: dumpsys package). Ignora os não encontrados."""
+    """versionName de cada package instalado (genérico: dumpsys package). Ignora os não encontrados."""
     out: dict[str, str] = {}
     for pkg in packages:
         rc, val = await _run("adb", "-s", udid, "shell", "dumpsys", "package", pkg, timeout=8)

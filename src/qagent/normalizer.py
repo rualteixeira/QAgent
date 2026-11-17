@@ -1,6 +1,6 @@
-"""F3 — normalizador de entrada (CPS 7.1): texto livre / Gherkin → passos `ai`.
+"""Normalizador de entrada: texto livre / Gherkin → passos `ai`.
 
-- Gherkin (`scenario`): determinístico, sem LLM (CPS 7.4: "se vier scenario, não se usa o LLM").
+- Gherkin (`scenario`): determinístico, sem LLM.
 - Texto livre (`testExecution`): 1 chamada LLM com saída estruturada (Pydantic).
 Cada passo leva o tipo Gherkin no texto ("[THEN] …") para o executor distinguir ação de verificação.
 """

@@ -31,7 +31,7 @@ def test_prompts_contain_no_test_app_terms():
 
 
 def test_tool_descriptions_in_code_are_generic():
-    # Descrições das ferramentas e mensagens enviadas ao LLM em todo o executor (G4: dividido em qagent/agent/).
+    # Descrições das ferramentas e mensagens enviadas ao LLM em todo o executor (qagent/agent/).
     files = [Path(ai_executor.__file__), *Path(qagent.agent.__file__).parent.glob("*.py")]
     src = "\n".join(f.read_text(encoding="utf-8") for f in files)
     descs = re.findall(r'description="([^"]+)"', src)
@@ -53,7 +53,7 @@ def _llm_facing_strings(path: Path) -> list[str]:
 
 
 def test_every_message_sent_to_the_llm_is_generic():
-    # 2026-11-13: as regras do veredicto (verdict.py) e os avisos das ferramentas também chegam ao LLM — têm de
+    # As regras do veredicto (verdict.py) e os avisos das ferramentas também chegam ao LLM — têm de
     # servir qualquer app, como os prompts.
     files = [Path(ai_executor.__file__), *Path(qagent.agent.__file__).parent.glob("*.py")]
     leaks = {f"{f.name}: {s[:80]!r}": t for f in files for s in _llm_facing_strings(f)
@@ -67,7 +67,7 @@ def test_every_executor_prompt_version_resolves_language():
         assert version == v and "LANG-X" in text and "{report_language}" not in text
 
 
-# 2026-11-13: além dos nomes das apps de teste, as versões em uso não podem ter vocabulário de DOMÍNIO (o agente
+# Além dos nomes das apps de teste, as versões em uso não podem ter vocabulário de domínio (o agente
 # não sabe que tipo de app vai testar): só conceitos de interface do Android.
 DOMAIN = ["shop", "shopping", "cart", "checkout", "purchase", "payments?", "pay", "orders?", "products?", "prices?",
           "bank", "banking", "invoice", "booking", "login", "log in", "sign in", "e-?commerce", "e-?mail", "password",
