@@ -14,9 +14,6 @@ O resultado de cada execução tem três partes:
 - um log com segredos mascarados;
 - a pedido, um script Python + Appium gerado sem LLM.
 
-Os utilizadores são QA e programadores, através de uma **Interface web** React ou de pedidos HTTP diretos. O sistema é um protótipo para avaliar o appium-mcp antes de uma integração no testingOn / genai_fastapi.
-- **⚠ INFERIDO**, com base em `docs/CPS-QAgent.md` §1 e §3.6 e em comentários do código que citam o "CPS".
-- **CONFIRMADO** que nenhuma integração com o testingOn existe no código: não há qualquer chamada a esses sistemas em `src/`.
 
 ## 2. Âmbito e método
 
