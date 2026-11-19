@@ -148,7 +148,7 @@ O cabeçalho do script indica:
 
 - `tests/test_prompts_app_agnostic.py` falha se uma prompt mencionar termos das apps de teste. As prompts têm de servir qualquer app.
 - `examples/` tem casos da My Demo App (regressão); `examples/blind/` tem casos para apps de sistema nunca usadas na afinação.
-- A arquitetura está descrita em [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
+- Documentação: [arquitetura](docs/ARQUITETURA.md), [como funciona o agente](docs/AGENTE.md) e [instalação](docs/INSTALACAO.md).
 
 ## Limitações conhecidas
 
